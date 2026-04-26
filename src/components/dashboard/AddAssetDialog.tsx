@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const assetSchema = z.object({
   name: z.string().min(1, '请输入物品名称'),
   category: z.string().min(1, '请选择分类'),
-  purchase_price: z.preprocess((val) => Number(val), z.number().min(0, '价格必须大于等于0')),
+  purchase_price: z.number().min(0, '价格必须大于等于0'),
   purchase_date: z.string().min(1, '请选择日期'),
 })
 
@@ -37,12 +37,10 @@ export function AddAssetDialog() {
   })
 
   const onSubmit = async (data: AssetFormValues) => {
-    console.log('正在提交数据:', data)
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       
       if (userError || !user) {
-        console.error('未找到登录用户:', userError)
         alert('请先登录再操作')
         router.push('/login')
         return
@@ -58,23 +56,16 @@ export function AddAssetDialog() {
       })
 
       if (error) {
-        console.error('Supabase 插入错误:', error)
         alert(`保存失败: ${error.message}`)
       } else {
-        console.log('保存成功！')
         setOpen(false)
         router.refresh()
-        // 强制刷新当前路径数据
         window.location.reload()
       }
     } catch (err) {
-      console.error('提交过程中发生意外错误:', err)
+      console.error(err)
       alert('发生意外错误，请重试')
     }
-  }
-
-  const onInvalid = (errors: unknown) => {
-    console.warn('表单校验未通过:', errors)
   }
 
   return (
@@ -89,7 +80,7 @@ export function AddAssetDialog() {
         <DialogHeader>
           <DialogTitle>添加新资产</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="name">物品名称</Label>
             <Input id="name" placeholder="例如：MacBook Pro 16" {...register('name')} />

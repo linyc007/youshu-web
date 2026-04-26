@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 const sellAssetSchema = z.object({
-  sold_price: z.preprocess((val) => Number(val), z.number().min(0, '价格必须大于等于0')),
+  sold_price: z.number().min(0, '价格必须大于等于0'),
   sold_date: z.string().min(1, '请选择日期'),
 })
 
@@ -46,7 +46,6 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
         return
       }
 
-      // 更新资产状态为 SOLD，并记录卖出信息
       const { error: updateError } = await supabase
         .from('assets')
         .update({
@@ -58,13 +57,11 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
         .eq('user_id', user.id)
 
       if (updateError) {
-        console.error('更新资产失败:', updateError)
         alert(`更新失败: ${updateError.message}`)
         return
       }
 
-      // 同时记录一条交易记录
-      const { error: transError } = await supabase
+      await supabase
         .from('transactions')
         .insert({
           asset_id: assetId,
@@ -75,16 +72,11 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
           notes: `卖出资产: ${assetName}`,
         })
 
-      if (transError) {
-        console.warn('记录交易失败 (可选):', transError)
-      }
-
       setOpen(false)
       router.refresh()
-      // 强制刷新
       window.location.reload()
     } catch (err) {
-      console.error('提交过程中发生意外错误:', err)
+      console.error(err)
       alert('发生意外错误，请重试')
     }
   }
@@ -114,7 +106,7 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
 
           <div className="space-y-2">
             <Label htmlFor="sold_date">卖出日期</Label>
-            <Input id="sold_date" type="date" {...register('sold_date')} />
+            <Input id="date" type="date" {...register('sold_date')} />
             {errors.sold_date && <p className="text-xs text-red-500">{errors.sold_date.message}</p>}
           </div>
 
