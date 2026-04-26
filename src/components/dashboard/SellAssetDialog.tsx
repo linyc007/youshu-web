@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { createClient } from '@/lib/supabase/client'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -83,11 +83,14 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50">
-          卖出
-        </Button>
-      </DialogTrigger>
+      <Button 
+        onClick={() => setOpen(true)}
+        variant="outline" 
+        size="sm" 
+        className="text-orange-600 border-orange-200 hover:bg-orange-50"
+      >
+        卖出
+      </Button>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>资产卖出结算: {assetName}</DialogTitle>
