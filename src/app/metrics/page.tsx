@@ -9,7 +9,16 @@ export default async function MetricsPage() {
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData.user?.id
 
-  let assets: any[] = []
+  interface Asset {
+    id: string
+    name: string
+    category: string
+    purchase_price: number
+    purchase_date: string
+    status: string
+  }
+
+  let assets: Asset[] = []
   if (userId) {
     const { data } = await supabase
       .from('assets')

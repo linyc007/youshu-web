@@ -10,7 +10,17 @@ export default async function StocksPage() {
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData.user?.id
 
-  let transactions: any[] = []
+  interface StockTransaction {
+    id: string
+    symbol: string
+    transaction_type: 'BUY' | 'SELL'
+    price: number
+    quantity: number
+    currency: string
+    transaction_date: string
+  }
+
+  let transactions: StockTransaction[] = []
   if (userId) {
     const { data } = await supabase
       .from('stock_transactions')
