@@ -20,9 +20,9 @@ const assetSchema = z.object({
   purchase_date: z.string().min(1, '请选择日期'),
   currency: z.string().min(1, '请选择币种'),
   status: z.string().optional(),
-  sold_price: z.number().optional(),
-  sold_date: z.string().optional(),
-  sold_currency: z.string().optional(),
+  sold_price: z.number().optional().nullable(),
+  sold_date: z.string().optional().nullable(),
+  sold_currency: z.string().optional().nullable(),
 })
 
 type AssetFormValues = z.infer<typeof assetSchema>
@@ -36,9 +36,9 @@ interface EditAssetDialogProps {
     purchase_date: string
     currency: string
     status: string
-    sold_price?: number
-    sold_date?: string
-    sold_currency?: string
+    sold_price?: number | null
+    sold_date?: string | null
+    sold_currency?: string | null
   }
 }
 
@@ -56,13 +56,14 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
       purchase_date: asset.purchase_date,
       currency: asset.currency || 'CNY',
       status: asset.status,
-      sold_price: asset.sold_price ? Number(asset.sold_price) : undefined,
-      sold_date: asset.sold_date,
-      sold_currency: asset.sold_currency,
+      sold_price: asset.sold_price ? Number(asset.sold_price) : null,
+      sold_date: asset.sold_date || null,
+      sold_currency: asset.sold_currency || null,
     }
   })
 
   const onSubmit = async (data: AssetFormValues) => {
+    console.log('正在提交修改:', data)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -72,16 +73,7 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
         return
       }
 
-      const updateData: {
-        name: string
-        category: string
-        purchase_price: number
-        purchase_date: string
-        currency: string
-        sold_price?: number
-        sold_date?: string
-        sold_currency?: string
-      } = {
+      const updateData: any = {
         name: data.name,
         category: data.category,
         purchase_price: data.purchase_price,
@@ -102,6 +94,7 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
         .eq('user_id', user.id)
 
       if (error) {
+        console.error('更新失败:', error)
         alert(`更新失败: ${error.message}`)
       } else {
         setOpen(false)
@@ -109,8 +102,17 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
         window.location.reload()
       }
     } catch (err) {
-      console.error(err)
+      console.error('意外错误:', err)
       alert('发生意外错误，请重试')
+    }
+  }
+
+  const onInvalid = (errs: any) => {
+    console.warn('表单验证失败:', errs)
+    // 自动弹出第一个错误
+    const firstError = Object.values(errs)[0] as any
+    if (firstError) {
+      alert(`验证失败: ${firstError.message || '请检查输入'}`)
     }
   }
 
@@ -128,7 +130,7 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
         <DialogHeader>
           <DialogTitle>编辑资产信息</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="name">物品名称</Label>
             <Input id="name" {...register('name')} />
@@ -235,7 +237,7 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="sold_date">卖出日期</Label>
-                <Input id="sold_date" type="date" {...register('sold_date')} />
+                <Input id="sold_date_edit" type="date" {...register('sold_date')} />
               </div>
             </>
           )}
