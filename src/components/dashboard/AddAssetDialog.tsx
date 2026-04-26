@@ -73,7 +73,7 @@ export function AddAssetDialog() {
     }
   }
 
-  const onInvalid = (errors: any) => {
+  const onInvalid = (errors: unknown) => {
     console.warn('表单校验未通过:', errors)
   }
 
