@@ -17,6 +17,7 @@ const assetSchema = z.object({
   category: z.string().min(1, '请选择分类'),
   purchase_price: z.number().min(0, '价格必须大于等于0'),
   purchase_date: z.string().min(1, '请选择日期'),
+  currency: z.string().min(1, '请选择币种'),
 })
 
 type AssetFormValues = z.infer<typeof assetSchema>
@@ -33,6 +34,7 @@ export function AddAssetDialog() {
       category: '',
       purchase_price: 0,
       purchase_date: new Date().toISOString().split('T')[0],
+      currency: 'CNY',
     }
   })
 
@@ -52,6 +54,7 @@ export function AddAssetDialog() {
         category: data.category,
         purchase_price: data.purchase_price,
         purchase_date: data.purchase_date,
+        currency: data.currency,
         status: 'ACTIVE'
       })
 
@@ -110,15 +113,38 @@ export function AddAssetDialog() {
             {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="price">买入价格 (元)</Label>
-            <Input 
-              id="price" 
-              type="number" 
-              step="0.01" 
-              {...register('purchase_price', { valueAsNumber: true })} 
-            />
-            {errors.purchase_price && <p className="text-xs text-red-500">{errors.purchase_price.message}</p>}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">买入价格</Label>
+              <Input 
+                id="price" 
+                type="number" 
+                step="0.01" 
+                {...register('purchase_price', { valueAsNumber: true })} 
+              />
+              {errors.purchase_price && <p className="text-xs text-red-500">{errors.purchase_price.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">币种</Label>
+              <Controller
+                control={control}
+                name="currency"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="币种" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CNY">人民币 (CNY)</SelectItem>
+                      <SelectItem value="EUR">欧元 (EUR)</SelectItem>
+                      <SelectItem value="USD">美元 (USD)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.currency && <p className="text-xs text-red-500">{errors.currency.message}</p>}
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { createClient } from '@/lib/supabase/client'
@@ -11,9 +11,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 const sellAssetSchema = z.object({
   sold_price: z.number().min(0, '价格必须大于等于0'),
   sold_date: z.string().min(1, '请选择日期'),
+  currency: z.string().min(1, '请选择币种'),
 })
 
 type SellAssetFormValues = z.infer<typeof sellAssetSchema>
@@ -21,18 +24,20 @@ type SellAssetFormValues = z.infer<typeof sellAssetSchema>
 interface SellAssetDialogProps {
   assetId: string
   assetName: string
+  defaultCurrency?: string
 }
 
-export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
+export function SellAssetDialog({ assetId, assetName, defaultCurrency = 'CNY' }: SellAssetDialogProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const supabase = createClient()
   
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SellAssetFormValues>({
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<SellAssetFormValues>({
     resolver: zodResolver(sellAssetSchema),
     defaultValues: {
       sold_price: 0,
       sold_date: new Date().toISOString().split('T')[0],
+      currency: defaultCurrency,
     }
   })
 
@@ -52,6 +57,7 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
           status: 'SOLD',
           sold_price: data.sold_price,
           sold_date: data.sold_date,
+          sold_currency: data.currency,
         })
         .eq('id', assetId)
         .eq('user_id', user.id)
@@ -68,6 +74,7 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
           user_id: user.id,
           transaction_type: 'SELL',
           amount: data.sold_price,
+          currency: data.currency,
           transaction_date: data.sold_date,
           notes: `卖出资产: ${assetName}`,
         })
@@ -96,15 +103,38 @@ export function SellAssetDialog({ assetId, assetName }: SellAssetDialogProps) {
           <DialogTitle>资产卖出结算: {assetName}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="sold_price">卖出价格 (元)</Label>
-            <Input 
-              id="sold_price" 
-              type="number" 
-              step="0.01" 
-              {...register('sold_price', { valueAsNumber: true })} 
-            />
-            {errors.sold_price && <p className="text-xs text-red-500">{errors.sold_price.message}</p>}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="sold_price">卖出价格</Label>
+              <Input 
+                id="sold_price" 
+                type="number" 
+                step="0.01" 
+                {...register('sold_price', { valueAsNumber: true })} 
+              />
+              {errors.sold_price && <p className="text-xs text-red-500">{errors.sold_price.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">币种</Label>
+              <Controller
+                control={control}
+                name="currency"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="币种" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CNY">人民币 (CNY)</SelectItem>
+                      <SelectItem value="EUR">欧元 (EUR)</SelectItem>
+                      <SelectItem value="USD">美元 (USD)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.currency && <p className="text-xs text-red-500">{errors.currency.message}</p>}
+            </div>
           </div>
 
           <div className="space-y-2">
