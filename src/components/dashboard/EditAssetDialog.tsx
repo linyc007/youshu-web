@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { createClient } from '@/lib/supabase/client'
@@ -63,7 +63,6 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
   })
 
   const onSubmit = async (data: AssetFormValues) => {
-    console.log('正在提交修改:', data)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -73,7 +72,7 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
         return
       }
 
-      const updateData: any = {
+      const updateData: Partial<AssetFormValues> = {
         name: data.name,
         category: data.category,
         purchase_price: data.purchase_price,
@@ -94,7 +93,6 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('更新失败:', error)
         alert(`更新失败: ${error.message}`)
       } else {
         setOpen(false)
@@ -102,17 +100,16 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
         window.location.reload()
       }
     } catch (err) {
-      console.error('意外错误:', err)
+      console.error(err)
       alert('发生意外错误，请重试')
     }
   }
 
-  const onInvalid = (errs: any) => {
+  const onInvalid = (errs: FieldErrors<AssetFormValues>) => {
     console.warn('表单验证失败:', errs)
-    // 自动弹出第一个错误
-    const firstError = Object.values(errs)[0] as any
-    if (firstError) {
-      alert(`验证失败: ${firstError.message || '请检查输入'}`)
+    const errorMessages = Object.values(errs).map(e => e?.message).filter(Boolean)
+    if (errorMessages.length > 0) {
+      alert(`验证失败: ${errorMessages[0]}`)
     }
   }
 
@@ -236,7 +233,7 @@ export function EditAssetDialog({ asset }: EditAssetDialogProps) {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sold_date">卖出日期</Label>
+                <Label htmlFor="sold_date_edit">卖出日期</Label>
                 <Input id="sold_date_edit" type="date" {...register('sold_date')} />
               </div>
             </>
