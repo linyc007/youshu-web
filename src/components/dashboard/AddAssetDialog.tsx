@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const assetSchema = z.object({
   name: z.string().min(1, '请输入物品名称'),
   category: z.string().min(1, '请选择分类'),
-  purchase_price: z.coerce.number({ message: '请输入有效数字' }).min(0, '价格必须大于等于0'),
+  purchase_price: z.preprocess((val) => Number(val), z.number().min(0, '价格必须大于等于0')),
   purchase_date: z.string().min(1, '请选择日期'),
 })
 

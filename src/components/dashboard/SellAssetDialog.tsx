@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 const sellAssetSchema = z.object({
-  sold_price: z.coerce.number({ message: '请输入有效数字' }).min(0, '价格必须大于等于0'),
+  sold_price: z.preprocess((val) => Number(val), z.number().min(0, '价格必须大于等于0')),
   sold_date: z.string().min(1, '请选择日期'),
 })
 
