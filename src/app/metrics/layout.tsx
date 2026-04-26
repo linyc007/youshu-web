@@ -1,7 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export default async function Home() {
+export default async function MetricsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -9,6 +13,5 @@ export default async function Home() {
     redirect("/login");
   }
 
-  // 已登录用户重定向到 dashboard
-  redirect("/dashboard");
+  return <>{children}</>;
 }
