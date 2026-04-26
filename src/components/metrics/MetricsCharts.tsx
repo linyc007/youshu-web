@@ -71,7 +71,7 @@ export function MetricsCharts({ assets }: { assets: Asset[] }) {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
@@ -80,7 +80,8 @@ export function MetricsCharts({ assets }: { assets: Asset[] }) {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => `¥${value.toFixed(2)}`} />
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <Tooltip formatter={(value: any) => `¥${Number(value || 0).toFixed(2)}`} />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
@@ -96,7 +97,8 @@ export function MetricsCharts({ assets }: { assets: Asset[] }) {
               tickFormatter={(str) => str.split('-').slice(1).join('/')} 
             />
             <YAxis fontSize={12} />
-            <Tooltip formatter={(value: number) => `¥${value.toFixed(2)}`} />
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <Tooltip formatter={(value: any) => `¥${Number(value || 0).toFixed(2)}`} />
             <Line 
               type="monotone" 
               dataKey="value" 

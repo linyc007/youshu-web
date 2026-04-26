@@ -2,6 +2,9 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { createClient } from '@/lib/supabase/server'
 import { AddAssetDialog } from '@/components/dashboard/AddAssetDialog'
 import { SellAssetDialog } from '@/components/dashboard/SellAssetDialog'
+import { EditAssetDialog } from '@/components/dashboard/EditAssetDialog'
+import { DeleteAssetDialog } from '@/components/dashboard/DeleteAssetDialog'
+import { UndoSellDialog } from '@/components/dashboard/UndoSellDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
@@ -22,6 +25,7 @@ interface Asset {
 
 export default async function DashboardPage() {
   const supabase = createClient()
+  const today = new Date()
   
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData.user?.id
@@ -160,8 +164,14 @@ export default async function DashboardPage() {
                           <TableCell className="hidden md:table-cell">{asset.purchase_date}</TableCell>
                           <TableCell className="hidden sm:table-cell">{diffDays} 天</TableCell>
                           <TableCell>{currencySymbols[asset.currency || 'CNY']}{dailyCost.toFixed(2)}/天</TableCell>
-                          <TableCell className="text-right">
-                            <SellAssetDialog assetId={asset.id} assetName={asset.name} defaultCurrency={asset.currency} />
+                          <TableCell className={asset.status === 'ACTIVE' ? "text-right" : "text-right"}>
+                            <div className="flex items-center justify-end gap-1">
+                              {asset.status === 'ACTIVE' && (
+                                <SellAssetDialog assetId={asset.id} assetName={asset.name} defaultCurrency={asset.currency} />
+                              )}
+                              <EditAssetDialog asset={asset} />
+                              <DeleteAssetDialog assetId={asset.id} assetName={asset.name} />
+                            </div>
                           </TableCell>
                         </TableRow>
                       )
@@ -189,13 +199,14 @@ export default async function DashboardPage() {
                     <TableHead className="hidden sm:table-cell">持有天数</TableHead>
                     <TableHead>盈亏</TableHead>
                     <TableHead className="hidden md:table-cell">总成本</TableHead>
-                    <TableHead className="text-right">平均日耗</TableHead>
+                    <TableHead className="hidden sm:table-cell">平均日耗</TableHead>
+                    <TableHead className="text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {assets.filter(a => a.status === 'SOLD').length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center h-24 text-gray-500">
+                      <TableCell colSpan={7} className="text-center h-24 text-gray-500">
                         暂无已流转资产。
                       </TableCell>
                     </TableRow>
@@ -235,8 +246,15 @@ export default async function DashboardPage() {
                           <TableCell className="hidden md:table-cell">
                             {currencySymbols[asset.currency || 'CNY']}{totalCost.toFixed(2)}
                           </TableCell>
-                          <TableCell className="text-right font-medium">
+                          <TableCell className="hidden sm:table-cell font-medium">
                             {currencySymbols[asset.currency || 'CNY']}{dailyCost.toFixed(2)}/天
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <UndoSellDialog assetId={asset.id} assetName={asset.name} />
+                              <EditAssetDialog asset={asset} />
+                              <DeleteAssetDialog assetId={asset.id} assetName={asset.name} />
+                            </div>
                           </TableCell>
                         </TableRow>
                       )
