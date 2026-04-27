@@ -10,6 +10,13 @@ interface StockHoldingsClientProps {
   transactions: StockTransaction[]
 }
 
+const currencySymbols: Record<string, string> = {
+  CNY: '¥',
+  USD: '$',
+  EUR: '€',
+  HKD: 'HK$'
+}
+
 export function StockHoldingsClient({ transactions }: StockHoldingsClientProps) {
   // Calculate holdings
   const holdingsMap = transactions.reduce((acc, t) => {
@@ -24,7 +31,7 @@ export function StockHoldingsClient({ transactions }: StockHoldingsClientProps) 
         totalSellProceeds: 0,
         totalSellQuantity: 0,
         realizedPnL: 0,
-        currency: t.currency,
+        currency: t.currency || 'CNY',
       }
     }
 
@@ -54,22 +61,39 @@ export function StockHoldingsClient({ transactions }: StockHoldingsClientProps) 
     const numPrice = parseFloat(price)
     if (!isNaN(numPrice)) {
       setCurrentPrices(prev => ({ ...prev, [symbol]: numPrice }))
+    } else if (price === '') {
+      const newPrices = { ...currentPrices }
+      delete newPrices[symbol]
+      setCurrentPrices(newPrices)
     }
   }
 
-  const totalRealizedPnL = holdings.reduce((sum, h) => sum + h.realizedPnL, 0)
-  const totalMarketValue = holdings.reduce((sum, h) => {
-    const price = currentPrices[h.symbol] || h.avgCost
-    return sum + (h.quantity > 0 ? h.quantity * price : 0)
-  }, 0)
-  
-  const totalFloatingPnL = holdings.reduce((sum, h) => {
-    const price = currentPrices[h.symbol]
-    if (price && h.quantity > 0) {
-      return sum + (price - h.avgCost) * h.quantity
+  // Aggregate by currency
+  const summaryByCurrency = holdings.reduce((acc, h) => {
+    const currency = h.currency
+    if (!acc[currency]) {
+      acc[currency] = {
+        marketValue: 0,
+        realizedPnL: 0,
+        floatingPnL: 0
+      }
     }
-    return sum
-  }, 0)
+    
+    const price = currentPrices[h.symbol] || h.avgCost
+    const marketValue = h.quantity > 0 ? h.quantity * price : 0
+    
+    const currentFloating = currentPrices[h.symbol] && h.quantity > 0
+      ? (currentPrices[h.symbol] - h.avgCost) * h.quantity 
+      : 0
+
+    acc[currency].marketValue += marketValue
+    acc[currency].realizedPnL += h.realizedPnL
+    acc[currency].floatingPnL += currentFloating
+    
+    return acc
+  }, {} as Record<string, { marketValue: number, realizedPnL: number, floatingPnL: number }>)
+
+  const currencies = Object.keys(summaryByCurrency)
 
   return (
     <div className="space-y-6">
@@ -79,13 +103,25 @@ export function StockHoldingsClient({ transactions }: StockHoldingsClientProps) 
             <CardTitle className="text-sm font-medium">总持仓市值</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">¥{totalMarketValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              浮动盈亏: 
-              <span className={totalFloatingPnL >= 0 ? 'text-green-600' : 'text-red-600'}>
-                {totalFloatingPnL >= 0 ? ' +' : ' '}{totalFloatingPnL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </span>
-            </p>
+            {currencies.length === 0 ? (
+              <div className="text-2xl font-bold">¥0.00</div>
+            ) : (
+              currencies.map(currency => {
+                const data = summaryByCurrency[currency]
+                const sym = currencySymbols[currency] || currency
+                return (
+                  <div key={currency} className="mb-3 last:mb-0">
+                    <div className="text-xl font-bold">{sym}{data.marketValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {currency} 浮动盈亏: 
+                      <span className={data.floatingPnL >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        {data.floatingPnL >= 0 ? ' +' : ' '}{data.floatingPnL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </span>
+                    </p>
+                  </div>
+                )
+              })
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -93,9 +129,19 @@ export function StockHoldingsClient({ transactions }: StockHoldingsClientProps) 
             <CardTitle className="text-sm font-medium">累计已实现盈亏</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${totalRealizedPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ¥{totalRealizedPnL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </div>
+            {currencies.length === 0 ? (
+              <div className="text-2xl font-bold">¥0.00</div>
+            ) : (
+              currencies.map(currency => {
+                const data = summaryByCurrency[currency]
+                const sym = currencySymbols[currency] || currency
+                return (
+                  <div key={currency} className={`text-xl font-bold mb-2 last:mb-0 ${data.realizedPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {sym}{data.realizedPnL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
+                )
+              })
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -103,9 +149,20 @@ export function StockHoldingsClient({ transactions }: StockHoldingsClientProps) 
             <CardTitle className="text-sm font-medium">总盈亏 (已实现+浮动)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${(totalRealizedPnL + totalFloatingPnL) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ¥{(totalRealizedPnL + totalFloatingPnL).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            </div>
+            {currencies.length === 0 ? (
+              <div className="text-2xl font-bold">¥0.00</div>
+            ) : (
+              currencies.map(currency => {
+                const data = summaryByCurrency[currency]
+                const sym = currencySymbols[currency] || currency
+                const totalPnL = data.realizedPnL + data.floatingPnL
+                return (
+                  <div key={currency} className={`text-xl font-bold mb-2 last:mb-0 ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {sym}{totalPnL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
+                )
+              })
+            )}
           </CardContent>
         </Card>
       </div>
@@ -134,36 +191,40 @@ export function StockHoldingsClient({ transactions }: StockHoldingsClientProps) 
             ) : (
               holdings.map((h) => {
                 const currentPrice = currentPrices[h.symbol]
-                const floatingPnL = currentPrice ? (currentPrice - h.avgCost) * h.quantity : 0
+                const floatingPnL = currentPrice && h.quantity > 0 ? (currentPrice - h.avgCost) * h.quantity : 0
                 const marketValue = currentPrice ? currentPrice * h.quantity : h.avgCost * h.quantity
+                const sym = currencySymbols[h.currency] || ''
 
                 return (
                   <TableRow key={h.symbol}>
-                    <TableCell className="font-bold">{h.symbol}</TableCell>
+                    <TableCell className="font-bold">
+                      {h.symbol}
+                      <div className="text-xs text-gray-400 font-normal">{h.currency}</div>
+                    </TableCell>
                     <TableCell>{h.quantity}</TableCell>
-                    <TableCell>{h.avgCost.toFixed(3)}</TableCell>
+                    <TableCell>{sym}{h.avgCost.toFixed(3)}</TableCell>
                     <TableCell>
                       <Input
                         type="number"
                         placeholder="输入现价"
                         className="w-24 h-8 text-sm"
-                        value={currentPrices[h.symbol] || ''}
+                        value={currentPrices[h.symbol] ?? ''}
                         onChange={(e) => handlePriceChange(h.symbol, e.target.value)}
                       />
                     </TableCell>
                     <TableCell className={floatingPnL >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      {currentPrice ? floatingPnL.toFixed(2) : '-'}
-                      {currentPrice && (
+                      {currentPrice ? `${sym}${floatingPnL.toFixed(2)}` : '-'}
+                      {currentPrice && h.quantity > 0 && (
                         <div className="text-xs opacity-70">
                           {((floatingPnL / (h.avgCost * h.quantity)) * 100).toFixed(2)}%
                         </div>
                       )}
                     </TableCell>
                     <TableCell className={h.realizedPnL >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      {h.realizedPnL.toFixed(2)}
+                      {sym}{h.realizedPnL.toFixed(2)}
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      {marketValue.toFixed(2)}
+                      {sym}{marketValue.toFixed(2)}
                     </TableCell>
                   </TableRow>
                 )
