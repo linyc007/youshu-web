@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -22,15 +23,12 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     setMsg(null)
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-
       if (error) throw error
-
       if (data.user) {
         setMsg('登录成功，正在跳转...')
         router.push('/dashboard')
@@ -52,15 +50,13 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     setMsg(null)
-
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       })
-
       if (error) throw error
-      
+
       if (data.session) {
         setMsg('注册成功并已自动登录！正在前往仪表盘...')
         router.push('/dashboard')
@@ -94,21 +90,29 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">邮箱</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="m@example.com" 
-                required 
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <Input 
-                id="password" 
-                type="password" 
-                required 
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">密码</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-gray-500 hover:text-gray-900 underline-offset-4 hover:underline"
+                >
+                  忘记密码？
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
