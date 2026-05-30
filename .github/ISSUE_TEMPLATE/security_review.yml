@@ -1,0 +1,36 @@
+name: Security review task
+description: Track a non-sensitive security review task
+title: "Security: "
+labels: ["security", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not use this template to disclose an active vulnerability. For vulnerabilities, follow SECURITY.md and report privately.
+  - type: textarea
+    id: scope
+    attributes:
+      label: Review scope
+      description: What area should be reviewed?
+      placeholder: Auth flow, RLS policy, protected route, form validation, dependency review...
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why this matters
+      description: Explain the user data or reliability concern.
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Suggested checklist
+      placeholder: |
+        - [ ] Confirm user-owned queries filter by authenticated user.
+        - [ ] Confirm unauthorized access fails.
+        - [ ] Document assumptions.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes

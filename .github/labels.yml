@@ -1,0 +1,45 @@
+# Suggested labels for maintainers. GitHub does not apply this file
+# automatically; use it as a source of truth when creating repository labels.
+
+- name: auth
+  color: "5319E7"
+  description: Authentication, sessions, login, or password reset
+- name: bug
+  color: "D73A4A"
+  description: Something is broken
+- name: documentation
+  color: "0075CA"
+  description: Documentation improvements
+- name: enhancement
+  color: "A2EEEF"
+  description: New feature or improvement
+- name: good first issue
+  color: "7057FF"
+  description: Good for new contributors
+- name: maintenance
+  color: "FBCA04"
+  description: Maintainer workflow, cleanup, or project health
+- name: metrics
+  color: "C2E0C6"
+  description: Metrics tracking and visualization
+- name: needs-triage
+  color: "EDEDED"
+  description: Needs maintainer review
+- name: roadmap
+  color: "1D76DB"
+  description: Planned project direction
+- name: security
+  color: "B60205"
+  description: Security review or hardening
+- name: stock-module
+  color: "0E8A16"
+  description: Stock holdings, transactions, and P&L logic
+- name: supabase
+  color: "3ECF8E"
+  description: Supabase database, Auth, or RLS work
+- name: testing
+  color: "F9D0C4"
+  description: Tests and validation
+- name: ui
+  color: "C5DEF5"
+  description: User interface and responsive design

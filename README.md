@@ -4,6 +4,10 @@ Youshu Web is an open-source personal data and asset tracking application. It he
 
 The project is built as a deployable Next.js application backed by Supabase, with a focus on privacy-conscious personal finance workflows and clear, maintainable TypeScript code.
 
+## Project Status
+
+Youshu Web is an early-stage project maintained in public. The app is deployed at [youshu-web.vercel.app](https://youshu-web.vercel.app), and the repository includes setup docs, a security policy, contribution guidelines, issue templates, and a public roadmap.
+
 ## Features
 
 - Email authentication, password reset, and protected app routes with Supabase Auth.
@@ -12,6 +16,10 @@ The project is built as a deployable Next.js application backed by Supabase, wit
 - Metrics dashboard with chart-based personal data visualization.
 - Responsive layout for desktop and mobile usage.
 - Supabase PostgreSQL schema and migration files for the backend data model.
+
+## Screenshots
+
+Product screenshots should use sample data only. See [docs/screenshots](docs/screenshots/README.md) for the screenshot checklist and recommended image names.
 
 ## Tech Stack
 
@@ -28,6 +36,8 @@ The project is built as a deployable Next.js application backed by Supabase, wit
 ## Repository Structure
 
 ```text
+.github/              Issue templates and pull request template
+docs/                 Roadmap, screenshot guidance, and maintenance notes
 src/app/              Next.js routes and layouts
 src/components/       Dashboard, stock, layout, and UI components
 src/context/          Authentication context
@@ -65,6 +75,14 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Documentation
+
+- [Contributing guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Screenshot guide](docs/screenshots/README.md)
+- [Suggested starter issues](docs/maintenance/ISSUE_SEEDS.md)
 
 ## Database
 
