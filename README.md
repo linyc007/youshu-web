@@ -81,8 +81,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - [Contributing guide](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Supabase setup guide](docs/SUPABASE_SETUP.md)
 - [Screenshot guide](docs/screenshots/README.md)
 - [Suggested starter issues](docs/maintenance/ISSUE_SEEDS.md)
+- [Changelog](CHANGELOG.md)
 
 ## Database
 
