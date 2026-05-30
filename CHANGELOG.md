@@ -6,6 +6,11 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ## [Unreleased]
 
+### Added
+
+- Added Dependabot configuration for weekly npm dependency update pull requests.
+- Added CODEOWNERS so repository ownership is explicit.
+
 ### Planned
 
 - Add complete Supabase setup and self-hosting documentation.

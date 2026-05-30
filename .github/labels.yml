@@ -10,6 +10,9 @@
 - name: documentation
   color: "0075CA"
   description: Documentation improvements
+- name: dependencies
+  color: "0366D6"
+  description: Dependency updates
 - name: enhancement
   color: "A2EEEF"
   description: New feature or improvement
