@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Youshu Web
+
+Youshu Web is an open-source personal data and asset tracking application. It helps individuals keep a clear view of long-term assets, stock transactions, multi-currency holdings, and custom metrics through a private dashboard.
+
+The project is built as a deployable Next.js application backed by Supabase, with a focus on privacy-conscious personal finance workflows and clear, maintainable TypeScript code.
+
+## Features
+
+- Email authentication, password reset, and protected app routes with Supabase Auth.
+- Asset dashboard for creating, editing, selling, deleting, and undoing asset sale records.
+- Stock transaction module with holdings, trade history, realized/floating profit and loss, and multi-currency summaries.
+- Metrics dashboard with chart-based personal data visualization.
+- Responsive layout for desktop and mobile usage.
+- Supabase PostgreSQL schema and migration files for the backend data model.
+
+## Tech Stack
+
+- Next.js 14 App Router
+- React 18
+- TypeScript
+- Tailwind CSS
+- shadcn/ui-style components
+- Supabase Auth and PostgreSQL
+- Recharts
+- Framer Motion
+- Vercel deployment
+
+## Repository Structure
+
+```text
+src/app/              Next.js routes and layouts
+src/components/       Dashboard, stock, layout, and UI components
+src/context/          Authentication context
+src/hooks/            Shared React hooks
+src/lib/              Supabase clients and utilities
+src/types/            Shared TypeScript types
+supabase/             Database schema and migration SQL
+```
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a local environment file:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Set the required Supabase variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The Supabase SQL files live in `supabase/`:
 
-## Learn More
+- `schema.sql` contains the initial database structure.
+- `migration_v2.sql` contains later stock and asset tracking changes.
+- `fix.sql` contains follow-up database fixes.
 
-To learn more about Next.js, take a look at the following resources:
+Before using the app with real data, review the SQL files and apply them to a Supabase project you control. Keep Row Level Security enabled for user-owned financial data.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev      # Start the local development server
+npm run build    # Build the production app
+npm run start    # Start the production server
+npm run lint     # Run Next.js linting
+```
 
-## Deploy on Vercel
+## Roadmap
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Improve documentation for local Supabase setup.
+- Add focused tests for asset and stock calculation logic.
+- Harden authentication, authorization, and Row Level Security workflows.
+- Improve stock quote update flows and cost-basis reporting.
+- Expand metric tracking while keeping the app simple and privacy-focused.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contributing
+
+Issues and pull requests are welcome. For changes that affect financial calculations, authentication, database access, or Row Level Security, please include a clear explanation of the behavior being changed and how it was tested.
+
+## Security
+
+Please do not open public issues for vulnerabilities involving authentication, private user data, or Supabase access control. Contact the maintainer privately or open a minimal report without sensitive details.
+
+## License
+
+Youshu Web is dual-licensed under either of:
+
+- MIT License ([LICENSE-MIT](LICENSE-MIT))
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+
+You may choose either license when using, modifying, or distributing this project.
